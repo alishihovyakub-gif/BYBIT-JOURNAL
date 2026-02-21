@@ -128,7 +128,15 @@ async function fetchAllExecutions(apiKey, apiSecret) {
       },
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(
+        res.ok ? 'Bybit вернул неверный ответ' : `Ошибка Bybit API: проверьте API Key и Secret, права Spot Read`
+      );
+    }
     if (data.retCode !== 0) throw new Error(data.retMsg || 'Ошибка Bybit API');
 
     const list = data.result?.list || [];
