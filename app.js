@@ -11,19 +11,19 @@ if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
   tg.expand();
 }
 
-// === 2. URL вашего API (поменяйте после деплоя на Vercel!) ===
-// Локально: не работает — нужен деплой
-// После деплоя: https://ваш-проект.vercel.app/api/bybit
-const API_URL = getApiUrl();
+// === 2. URL вашего API ===
+const STORAGE_API_URL = 'bybit_api_base_url';
 
 function getApiUrl() {
-  // Если открыто как Telegram Mini App или на Vercel — берём текущий хост
   const host = window.location.origin;
   if (host && host !== 'null' && !host.startsWith('file:')) {
     return host + '/api/bybit';
   }
-  // Иначе пользователь должен указать в настройках или в коде
-  return ''; // Заполните после деплоя: 'https://your-app.vercel.app/api/bybit'
+  const saved = localStorage.getItem(STORAGE_API_URL) || document.getElementById('apiBaseUrl')?.value?.trim();
+  if (saved) {
+    return saved.replace(/\/$/, '') + '/api/bybit';
+  }
+  return '';
 }
 
 // === 3. Расчёт среднего профита и лосса ===
@@ -93,8 +93,9 @@ async function loadFromBybit() {
     return;
   }
 
-  if (!API_URL) {
-    statusEl.textContent = 'Ошибка: приложение не задеплоено. Укажите URL API в app.js или задеплойте на Vercel.';
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    statusEl.textContent = 'Укажите URL приложения выше (например: https://ваш-проект.up.railway.app)';
     statusEl.className = 'status error';
     return;
   }
@@ -105,16 +106,28 @@ async function loadFromBybit() {
   statusEl.className = 'status';
 
   try {
-    const res = await fetch(API_URL, {
+    const savedUrl = document.getElementById('apiBaseUrl')?.value?.trim();
+    if (savedUrl) localStorage.setItem(STORAGE_API_URL, savedUrl);
+    const res = await fetch(getApiUrl(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ apiKey, apiSecret }),
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error(
+        res.ok
+          ? 'Сервер вернул неверный ответ'
+          : `Сервер вернул ошибку ${res.status}. Проверьте, что приложение задеплоено и API работает.`
+      );
+    }
 
     if (!res.ok) {
-      throw new Error(data.error || 'Ошибка при загрузке');
+      throw new Error(data.error || `Ошибка сервера ${res.status}`);
     }
 
     const trades = data.trades || [];
@@ -135,6 +148,10 @@ async function loadFromBybit() {
 
 // === 7. Запуск ===
 document.getElementById('btnLoad').addEventListener('click', loadFromBybit);
+
+// Восстановить сохранённый URL при загрузке
+const savedBase = localStorage.getItem(STORAGE_API_URL);
+if (savedBase) document.getElementById('apiBaseUrl').value = savedBase;
 
 // Показать пустую таблицу при загрузке
 renderTable([]);

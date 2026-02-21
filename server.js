@@ -11,6 +11,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BYBIT_BASE = 'https://api.bybit.com';
 
+// CORS для всех запросов
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  next();
+});
+
 // Парсинг JSON для POST-запросов
 app.use(express.json());
 
@@ -132,12 +141,6 @@ async function fetchAllExecutions(apiKey, apiSecret) {
 
 // API Bybit
 app.post('/api/bybit', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
-
   try {
     const { apiKey, apiSecret } = req.body || {};
     if (!apiKey || !apiSecret) {
