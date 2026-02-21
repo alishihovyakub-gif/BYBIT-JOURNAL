@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дневник спотовых сделок</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 Дневник сделок</h1>
+      <p class="subtitle">Спотовая торговля • Bybit API</p>
+    </header>
+
+    <!-- Подключение Bybit -->
+    <section class="connect-section">
+      <h2>🔗 Подключить Bybit</h2>
+      <p class="hint">Создайте API ключ в Bybit (только права «Чтение») и вставьте сюда. Данные не сохраняются на сервере.</p>
+      <div class="connect-form">
+        <label>API Key</label>
+        <input type="text" id="apiKey" placeholder="Ваш API Key из Bybit" autocomplete="off">
+        <label>API Secret</label>
+        <input type="password" id="apiSecret" placeholder="Ваш API Secret" autocomplete="off">
+        <button type="button" class="btn-load" id="btnLoad">📥 Загрузить сделки с Bybit</button>
+      </div>
+      <p class="status" id="status"></p>
+    </section>
+
+    <!-- Блок статистики -->
+    <section class="stats">
+      <h2>📈 Средние показатели</h2>
+      <div class="stats-grid">
+        <div class="stat-card profit">
+          <span class="stat-label">Средний профит (USDT)</span>
+          <span class="stat-value" id="avgProfit">0</span>
+        </div>
+        <div class="stat-card loss">
+          <span class="stat-label">Средний лосс (USDT)</span>
+          <span class="stat-value" id="avgLoss">0</span>
+        </div>
+        <div class="stat-card total">
+          <span class="stat-label">Общий P&L (USDT)</span>
+          <span class="stat-value" id="totalPnL">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Таблица сделок -->
+    <section class="table-section">
+      <h2>📋 Список сделок</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Токен</th>
+              <th>Кол-во</th>
+              <th>Вход</th>
+              <th>Выход</th>
+              <th>Сумма USDT</th>
+              <th>Комиссия</th>
+              <th>P&L USDT</th>
+              <th>P&L %</th>
+              <th>Длительность</th>
+            </tr>
+          </thead>
+          <tbody id="tradesTable">
+          </tbody>
+        </table>
+      </div>
+      <p class="empty-message" id="emptyMessage">Нажмите «Загрузить сделки с Bybit» для получения данных</p>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
